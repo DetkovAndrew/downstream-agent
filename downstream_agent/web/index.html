@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Downstream Agent — downstream benchmark</title>
+<style>
+  :root { --bg:#0b0f14; --panel:#131820; --raised:#1c2530; --line:#30363d; --text:#e6edf3; --muted:#8b949e;
+          --green:#3fb950; --yellow:#d29922; --red:#f85149; --blue:#58a6ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system, "Segoe UI", Arial, sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
+  a { color:var(--blue); text-decoration:none; } a:hover { text-decoration:underline; }
+  .top { display:flex; align-items:center; gap:18px; padding:10px 20px; background:var(--panel); border-bottom:1px solid var(--line);
+         position:sticky; top:0; z-index:5; flex-wrap:wrap; }
+  .brand { font-weight:600; font-size:16px; } .brand span { color:var(--muted); font-weight:400; margin-left:8px; font-size:13px; }
+  .model { display:flex; align-items:center; gap:8px; } .model label { color:var(--muted); font-size:12px; }
+  select, input[type=text], input[type=number], input[type=password] {
+    background:var(--raised); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:7px 9px; font:inherit; }
+  select:focus, input:focus { outline:1px solid var(--blue); }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:var(--muted); margin-right:6px; }
+  .dot.ok { background:var(--green); } .dot.warn { background:var(--yellow); } .dot.bad { background:var(--red); }
+  .spacer { flex:1; }
+  .dl a { display:inline-block; padding:6px 11px; border:1px solid var(--line); border-radius:6px; background:var(--raised); color:var(--text); margin-left:8px; font-size:13px; }
+  .dl a.off { opacity:.4; pointer-events:none; } .dl small { color:var(--muted); display:block; font-size:10px; }
+  button { background:var(--raised); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:8px 14px; font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--muted); } button:disabled { opacity:.45; cursor:default; }
+  button.primary { background:#238636; border-color:#2ea043; color:#fff; } button.primary:hover { background:#2ea043; }
+  button.danger { border-color:#6e2a2a; color:var(--red); }
+  .layout { display:flex; min-height:calc(100vh - 56px); }
+  .side { width:200px; background:var(--panel); border-right:1px solid var(--line); padding:14px 10px; flex-shrink:0; }
+  .side a { display:block; padding:10px 12px; margin-bottom:4px; border-radius:6px; color:var(--text); cursor:pointer; }
+  .side a:hover { background:var(--raised); text-decoration:none; } .side a.on { background:var(--raised); border-left:3px solid var(--green); }
+  .side .hint { color:var(--muted); font-size:11px; padding:12px; line-height:1.5; }
+  main { flex:1; padding:22px 28px; max-width:1250px; }
+  section { display:none; } section.on { display:block; }
+  h1 { font-size:18px; font-weight:600; margin:0 0 4px; } .sub { color:var(--muted); margin-bottom:18px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px; }
+  .card h2 { font-size:13px; margin:0 0 12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; font-weight:600; }
+  .row { display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start; } .row > div { display:flex; flex-direction:column; gap:5px; }
+  .row label.t { color:var(--muted); font-size:12px; }
+  .chk { display:flex; align-items:center; gap:6px; margin-right:14px; } .chk input { accent-color:var(--green); }
+  .picker { border:1px solid var(--line); border-radius:6px; background:var(--raised); width:340px; }
+  .picker .bar { display:flex; gap:6px; padding:6px; border-bottom:1px solid var(--line); }
+  .picker .bar input { flex:1; padding:5px 8px; } .picker .bar button { padding:4px 8px; font-size:12px; }
+  .picker .list { max-height:210px; overflow:auto; padding:4px 6px; }
+  .picker .it { display:flex; align-items:center; gap:7px; padding:3px 2px; } .picker .it small { color:var(--muted); margin-left:auto; }
+  .picker input[type=checkbox] { accent-color:var(--green); }
+  pre.log { background:#0d1117; border:1px solid var(--line); border-radius:6px; padding:12px; height:230px; overflow:auto; margin:12px 0 0;
+            font:12px/1.5 Consolas, "Courier New", monospace; color:#c9d1d9; white-space:pre-wrap; }
+  table { width:100%; border-collapse:collapse; font-size:13px; } th { text-align:left; color:var(--muted); font-weight:600; font-size:12px; padding:7px 8px; border-bottom:1px solid var(--line); }
+  td { padding:8px; border-bottom:1px solid #20262e; vertical-align:top; } tr:hover td { background:#161c24; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:#1f2a37; border:1px solid var(--line); margin-right:4px; white-space:nowrap; }
+  .tag.g { color:var(--green); border-color:#23552d; } .tag.y { color:var(--yellow); border-color:#5a4713; } .tag.r { color:var(--red); border-color:#6e2a2a; }
+  .muted { color:var(--muted); } .small { font-size:12px; }
+  .answer { background:var(--raised); border:1px solid var(--line); border-radius:6px; padding:12px; margin-top:12px; display:none; }
+  .answer blockquote { margin:8px 0 0; padding:8px 12px; border-left:3px solid var(--green); background:#10151c; color:#c9d1d9; font-size:13px; }
+  .field { display:grid; grid-template-columns:330px 1fr; gap:12px; align-items:center; padding:7px 0; border-bottom:1px solid #20262e; }
+  .field input { width:100%; }
+  .banner { padding:10px 14px; border-radius:6px; background:#2a2110; border:1px solid #5a4713; color:var(--yellow); margin-bottom:14px; display:none; }
+</style></head>
+<body>
+<header class="top">
+  <div class="brand">Downstream Agent<span>сравнение нефтяных компаний · downstream</span></div>
+  <div class="model"><label for="model">Модель</label><select id="model"></select><span id="mstat" class="small muted"></span></div>
+  <div class="spacer"></div>
+  <div class="dl">
+    <a id="dlNews" class="off" href="/download/news">⬇ Новости (Excel)<small id="dlNewsInfo">нет файла</small></a>
+    <a id="dlArchive" class="off" href="/download/archive">⬇ Архив всех находок<small id="dlArchiveInfo">нет файла</small></a>
+    <a id="dlReports" class="off" href="/download/reports">⬇ Отчёты (Excel)<small id="dlReportsInfo">нет файла</small></a>
+    <a id="dlAssertions" class="off" href="/download/assertions">⬇ Выводы downstream<small id="dlAssertionsInfo">нет файла</small></a>
+  </div>
+  <button id="quit" title="Остановить программу">Выход</button>
+</header>
+<div class="layout">
+  <nav class="side">
+    <a data-p="news" class="on">Новости</a>
+    <a data-p="reports">Отчёты</a>
+    <a data-p="keys">Ключи</a>
+    <div class="hint">Новости собираются из нескольких источников и записываются в Excel: только конкретные downstream-события
+      (построили, ввели, начали, остановили).<br><br>Данные хранятся в папке рядом с программой: <span id="dataDir"></span></div>
+  </nav>
+  <main>
+    <div class="banner" id="banner"></div>
+    <div class="banner" id="offline" style="background:#2d1517;border-color:#6e2a2a;color:var(--red);position:sticky;top:60px;z-index:4;font-weight:600">
+      Нет связи с программой: она закрыта или остановлена. Запустите Downstream-Agent.exe заново и обновите страницу (F5).
+      Всё, что уже было сохранено, лежит в папке data рядом с программой.</div>
+    <!-- НОВОСТИ -->
+    <section id="p-news" class="on">
+      <h1>Новости downstream</h1>
+      <div class="sub">Поиск → отбор конкретных событий → склейка дублей → Excel</div>
+      <div class="card"><h2>Параметры</h2>
+        <div class="row">
+          <div><label class="t">Компании</label><div class="picker" id="pickNews"></div></div>
+          <div style="gap:12px">
+            <div><label class="t">Период</label>
+              <select id="period"><option value="d">за день</option><option value="w" selected>за неделю</option><option value="m">за месяц</option></select></div>
+            <div><label class="t">Не больше новостей на компанию</label><input type="number" id="cap" value="40" min="5" max="200" style="width:90px"></div>
+          </div>
+          <div><label class="t">Источники</label>
+            <label class="chk"><input type="checkbox" class="src" value="gnews" checked> Google News</label>
+            <label class="chk"><input type="checkbox" class="src" value="newsapi"> NewsAPI</label>
+            <label class="chk"><input type="checkbox" class="src" value="gnewsio"> GNews API</label>
+            <label class="chk"><input type="checkbox" class="src" value="gdelt"> GDELT</label>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <label class="t" for="newsScope">Какие новости за выбранный период включить</label>
+          <select id="newsScope"><option value="new">Только ещё не разобранные</option><option value="all">Все, включая разобранные ранее</option></select>
+          <p class="small muted">Архив всех найденных публикаций сохраняется отдельно, до отбора по тематике.</p>
+          <label class="chk"><input type="checkbox" id="forceNews"> разобрать ранее обработанные заново выбранной моделью (при выборе всех новостей)</label>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px">
+          <button class="primary" id="runNews">Найти новости и записать в Excel</button>
+          <button class="danger" id="stopNews" disabled>Остановить</button>
+        </div>
+        <pre class="log" id="logNews">Готов к работе. Выберите компании и нажмите кнопку.</pre>
+      </div>
+      <div class="card"><h2>Последние события <button id="refreshNews" style="float:right;padding:3px 10px;font-size:12px">Обновить</button></h2>
+        <div id="newsTable" class="muted">Пока нет данных.</div></div>
+    </section>
+
+    <!-- ОТЧЁТЫ -->
+    <section id="p-reports">
+      <h1>Отчёты и показатели</h1>
+      <div class="sub">Поиск годовых и квартальных отчётов → распознавание PDF → показатели в Excel</div>
+      <div class="card"><h2>Параметры</h2>
+        <div class="row">
+          <div><label class="t">Компании</label><div class="picker" id="pickReports"></div></div>
+          <div>
+            <label class="t">Годы</label>
+            <div><label class="chk" style="display:inline-flex"><input type="checkbox" class="yr" value="2024"> 2024</label>
+              <label class="chk" style="display:inline-flex"><input type="checkbox" class="yr" value="2025" checked> 2025</label>
+              <label class="chk" style="display:inline-flex"><input type="checkbox" class="yr" value="2026" checked> 2026</label></div>
+            <label class="t" style="margin-top:8px">Типы документов</label>
+            <div><label class="chk" style="display:inline-flex"><input type="checkbox" class="ty" value="annual" checked> годовой</label>
+              <label class="chk" style="display:inline-flex"><input type="checkbox" class="ty" value="quarterly" checked> квартальный</label>
+              <label class="chk" style="display:inline-flex"><input type="checkbox" class="ty" value="results"> финрезультаты</label>
+              <label class="chk" style="display:inline-flex"><input type="checkbox" class="ty" value="release"> пресс-релиз</label></div>
+          </div>
+          <div>
+            <label class="t">Макс. страниц на файл (0 = все)</label><input type="number" id="maxPages" value="0" min="0" style="width:110px">
+            <label class="t" style="margin-top:8px">Только файлы с текстом в имени</label><input type="text" id="fileFilter" placeholder="например: annual" style="width:200px">
+            <label class="chk" style="margin-top:8px"><input type="checkbox" id="force"> перезаполнить уже обработанные</label>
+            <label class="chk"><input type="checkbox" id="strict"> строгая проверка (только дословные цитаты)</label>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button id="runFind">1. Найти отчёты в сети</button>
+          <div style="display:inline-flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button class="primary" id="runExtract">2. Распознать и извлечь показатели в Excel</button>
+            <button class="primary" id="runAssertions">Сделать выводы по downstream</button>
+          </div>
+          <button class="danger" id="stopRep" disabled>Остановить</button>
+        </div>
+        <pre class="log" id="logRep">Сначала найдите отчёты (или положите PDF в data/raw/&lt;компания&gt;/reports), затем извлеките показатели.</pre>
+      </div>
+      <div class="card"><h2>Вопрос по документам</h2>
+        <div class="row"><div style="flex:1;min-width:300px"><input type="text" id="question" placeholder="Какой ROACE был у Aramco за 2025 год?" style="width:100%"></div>
+          <div><button id="askBtn">Спросить</button></div></div>
+        <div class="answer" id="answer"></div></div>
+      <div class="card"><h2>Что уже собрано</h2><div id="statTable"></div></div>
+    </section>
+
+    <!-- КЛЮЧИ -->
+    <section id="p-keys">
+      <h1>Ключи доступа</h1>
+      <div class="sub">Хранятся только в файле .env рядом с программой, наружу не отправляются, кроме самих сервисов.</div>
+      <div class="card" id="keysBox"></div>
+      <div style="display:flex;gap:10px"><button class="primary" id="saveKeys">Сохранить</button></div>
+      <p class="small muted" style="margin-top:14px">Gemini работает только через прокси/VPN. GigaChat и Яндекс — напрямую из России.
+        Пустые поля не меняют уже сохранённые ключи.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => [...r.querySelectorAll(s)];
+let failed = 0;
+const api = async (url, body) => {
+  try { return await apiRaw(url, body); } catch (e) { failed++; if (failed >= 2) $('#offline').style.display = 'block'; throw e; }
+};
+const apiRaw = async (url, body) => {
+  const ac = new AbortController(), t = setTimeout(() => ac.abort(), url.startsWith('/api/ask') ? 300000 : 20000);
+  try {
+    const r = await fetch(url, body === undefined ? {signal: ac.signal} : {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body), signal: ac.signal});
+    if (r.status === 401) { location.reload(); return {}; }
+    return await r.json();
+  } finally { clearTimeout(t); }
+};
+let ST = null, picks = {};
+setInterval(async () => {
+  const ac = new AbortController(), t = setTimeout(() => ac.abort(), 3000);  // зависшее соединение тоже считаем потерей связи
+  try { await fetch('/api/ping', {cache: 'no-store', signal: ac.signal}); failed = 0; $('#offline').style.display = 'none'; }
+  catch (e) { failed++; if (failed >= 2) $('#offline').style.display = 'block'; }
+  finally { clearTimeout(t); }
+}, 4000);
+
+function picker(el, key) {
+  el.innerHTML = '<div class="bar"><input type="text" placeholder="Поиск компании"><button data-a="all">все</button><button data-a="none">снять</button></div><div class="list"></div>';
+  const list = $('.list', el), search = $('input', el);
+  picks[key] = new Set();
+  function draw() {
+    const q = search.value.toLowerCase();
+    list.innerHTML = ST.companies.filter(c => c.name.toLowerCase().includes(q) || c.country.toLowerCase().includes(q)).map(c =>
+      `<label class="it"><input type="checkbox" value="${c.id}" ${picks[key].has(c.id) ? 'checked' : ''}> ${c.name}<small>${c.country}</small></label>`).join('');
+  }
+  list.addEventListener('change', e => { e.target.checked ? picks[key].add(e.target.value) : picks[key].delete(e.target.value); });
+  el.addEventListener('click', e => {
+    const a = e.target.dataset.a; if (!a) return;
+    const q = search.value.toLowerCase();
+    ST.companies.filter(c => c.name.toLowerCase().includes(q)).forEach(c => a === 'all' ? picks[key].add(c.id) : picks[key].delete(c.id));
+    draw();
+  });
+  search.addEventListener('input', draw); draw();
+  el.redraw = draw;
+}
+const chosen = k => [...picks[k]];
+
+async function loadState(first=false) {
+  ST = await api('/api/state');
+  const sel = $('#model');
+  const groups = {gigachat:'GigaChat (Сбер)', yandex:'Яндекс AI Studio', gemini:'Google Gemini', deepseek:'DeepSeek', ollama:'Локально'};
+  sel.innerHTML = Object.keys(groups).map(g => `<optgroup label="${groups[g]}">` +
+    ST.models.filter(m => m.backend === g).map(m => `<option value="${m.value}">${m.label}${m.ready ? '' : ' — нет ключа'}</option>`).join('') + '</optgroup>').join('');
+  sel.value = ST.current;
+  updateModelStatus();
+  for (const k of ['news', 'archive', 'reports', 'assertions']) {
+    const f = ST.files[k], a = $({news:'#dlNews', archive:'#dlArchive', reports:'#dlReports', assertions:'#dlAssertions'}[k]), i = $({news:'#dlNewsInfo', archive:'#dlArchiveInfo', reports:'#dlReportsInfo', assertions:'#dlAssertionsInfo'}[k]);
+    a.classList.toggle('off', !f.exists); i.textContent = f.exists ? `${f.mtime} · ${(f.size/1024).toFixed(0)} КБ` : 'файл ещё не создан';
+  }
+  $('#dataDir').textContent = ST.data_dir;
+  if (first) {
+    picker($('#pickNews'), 'news'); picker($('#pickReports'), 'reports');
+    const want = new Set(ST.news_sources || ['gnews']);  // источники по умолчанию задаёт сервер (на нём не везде доступен Google News)
+    $$('.src').forEach(x => x.checked = want.has(x.value));
+  }
+  drawStats();
+}
+function updateModelStatus() {
+  const m = ST.models.find(x => x.value === $('#model').value);
+  const ok = m && m.ready;
+  $('#mstat').innerHTML = `<span class="dot ${ok ? 'ok' : 'bad'}"></span>${ok ? (m.vpn ? 'нужен прокси/VPN' : 'готова') : 'нет ключа — вкладка «Ключи»'}`;
+  const b = $('#banner');
+  if (!ok) { b.style.display = 'block'; b.textContent = 'Для выбранной модели не задан ключ. Откройте «Ключи» или выберите другую модель.'; } else b.style.display = 'none';
+}
+$('#model').addEventListener('change', async e => { await api('/api/model', {value: e.target.value}); await loadState(); });
+
+function drawStats() {
+  $('#statTable').innerHTML = '<table><tr><th>Компания</th><th>Страна</th><th>PDF</th><th>Распознано</th><th>В таблице</th><th>Новостей</th></tr>' +
+    ST.companies.map(c => `<tr><td>${c.name}</td><td class="muted">${c.country}</td><td>${c.pdf}</td><td>${c.recognized}</td><td>${c.extracted}</td><td>${c.news}</td></tr>`).join('') + '</table>';
+}
+
+// навигация
+$$('.side a').forEach(a => a.addEventListener('click', () => {
+  $$('.side a').forEach(x => x.classList.toggle('on', x === a));
+  $$('section').forEach(s => s.classList.toggle('on', s.id === 'p-' + a.dataset.p));
+  if (a.dataset.p === 'keys') loadKeys();
+}));
+
+// задачи
+let currentJob = null;
+async function startJob(kind, params, logEl, runBtns, stopBtn, onDone) {
+  logEl.textContent = '';
+  const r = await api('/api/jobs', {kind, params});
+  if (r.error) { logEl.textContent = '✘ ' + r.error; return; }
+  currentJob = r.id; runBtns.forEach(b => b.disabled = true); stopBtn.disabled = false;
+  stopBtn.onclick = () => api(`/api/jobs/${r.id}/cancel`, {});
+  let since = 0;
+  const tick = async () => {
+    let j;
+    try { j = await api(`/api/jobs/${r.id}?since=${since}`); }
+    catch (e) {
+      logEl.textContent += '\n✘ Связь с программой потеряна — вероятно, она закрыта. Запустите её заново и повторите (готовое сохранено).\n';
+      runBtns.forEach(b => b.disabled = false); stopBtn.disabled = true; return;
+    }
+    if (j.lines.length) { logEl.textContent += j.lines.join('\n') + '\n'; logEl.scrollTop = logEl.scrollHeight; }
+    since = j.next;
+    if (j.status === 'running') return setTimeout(tick, 1000);
+    runBtns.forEach(b => b.disabled = false); stopBtn.disabled = true; currentJob = null;
+    await loadState(); if (onDone) onDone(j);
+  };
+  tick();
+}
+$('#runNews').onclick = () => startJob('news', {
+  companies: chosen('news'), period: $('#period').value, cap: +$('#cap').value, sources: $$('.src:checked').map(x => x.value),
+  all: $('#newsScope').value === 'all', force: $('#forceNews').checked},
+  $('#logNews'), [$('#runNews')], $('#stopNews'), loadNews);
+$('#runFind').onclick = () => startJob('find_reports', {
+  companies: chosen('reports'), years: $$('.yr:checked').map(x => +x.value), types: $$('.ty:checked').map(x => x.value)},
+  $('#logRep'), [$('#runFind'), $('#runExtract')], $('#stopRep'));
+$('#runExtract').onclick = () => startJob('extract_reports', {
+  companies: chosen('reports'), max_pages: +$('#maxPages').value, file: $('#fileFilter').value.trim(), force: $('#force').checked, strict: $('#strict').checked},
+  $('#logRep'), [$('#runFind'), $('#runExtract')], $('#stopRep'));
+$('#runAssertions').onclick = () => startJob('assertions', {companies: chosen('reports')},
+  $('#logRep'), [$('#runFind'), $('#runExtract'), $('#runAssertions')], $('#stopRep'));
+
+async function loadNews() {
+  const rows = await api('/api/news/preview?n=40');
+  $('#newsTable').innerHTML = rows.length ? '<table><tr><th>Дата</th><th>Компании</th><th>Событие</th><th>Тип / сегмент</th><th>Ист.</th></tr>' + rows.map(r =>
+    `<tr><td>${r.date}</td><td>${r.companies}</td><td>${r.url ? `<a href="${r.url}" target="_blank" rel="noopener">${r.event}</a>` : r.event}</td>
+     <td><span class="tag g">${r.type || '—'}</span><span class="tag">${r.segment || '—'}</span></td><td>${r.sources}</td></tr>`).join('') + '</table>'
+    : '<span class="muted">Пока нет событий. Запустите поиск.</span>';
+}
+$('#refreshNews').onclick = loadNews;
+
+$('#askBtn').onclick = async () => {
+  const q = $('#question').value.trim(); if (!q) return;
+  const box = $('#answer'); box.style.display = 'block'; box.innerHTML = '<span class="muted">Думаю…</span>';
+  const r = await api('/api/ask', {question: q});
+  if (r.error) { box.innerHTML = `<span style="color:var(--red)">Ошибка: ${r.error}</span>`; return; }
+  box.innerHTML = `<div>${r.answer || ''}</div>` + (r.evidence || []).map(e => `<blockquote>«${e.quote}»<br><span class="muted small">${e.company} · ${e.file} · стр. ${e.page}</span></blockquote>`).join('') +
+    ((r.evidence || []).length ? '' : '<div class="small" style="color:var(--yellow);margin-top:8px">Ответ без проверенной цитаты — не доверяйте.</div>');
+};
+$('#question').addEventListener('keydown', e => { if (e.key === 'Enter') $('#askBtn').click(); });
+
+// ключи
+async function loadKeys() {
+  const ks = await api('/api/keys');
+  $('#keysBox').innerHTML = ks.map(k => `<div class="field"><div>${k.label}<div class="small ${k.set ? '' : 'muted'}">${k.set ? '<span class="dot ok"></span>задан ' + k.tail : '<span class="dot"></span>не задан'}</div></div>
+    <input type="password" data-k="${k.name}" placeholder="${k.set ? 'оставьте пустым, чтобы не менять' : 'вставьте ключ'}" autocomplete="off"></div>`).join('');
+}
+$('#saveKeys').onclick = async () => {
+  const v = {}; $$('#keysBox input').forEach(i => { if (i.value.trim()) v[i.dataset.k] = i.value.trim(); });
+  await api('/api/keys', v); await loadKeys(); await loadState();
+};
+$('#quit').onclick = async () => { if (confirm('Остановить программу?')) { await api('/api/shutdown', {}); document.body.innerHTML = '<p style="padding:40px">Программа остановлена. Окно можно закрыть.</p>'; } };
+
+loadState(true).then(loadNews);
+</script>
+</body></html>

@@ -1,0 +1,17 @@
+.env
+.venv/
+.winbuild/
+__pycache__/
+*.pyc
+data/
+dist/
+build/
+*.spec
+outputs/
+Test/
+certs/
+tesseract_win/
+.linux_build/
+.exe_build/
+.exe_live_test/
+downstream_agent_error.log

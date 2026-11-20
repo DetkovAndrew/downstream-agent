@@ -1,0 +1,7 @@
+requests>=2.31
+lxml>=5
+pymupdf>=1.24
+openpyxl>=3.1
+ddgs
+pypdf>=4
+certifi

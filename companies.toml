@@ -1,0 +1,267 @@
+# Компании для сравнения. Ссылки не нужны: агент сам ищет отчёты и новости в сети.
+#   pages   — страницы IR/пресс-центра: с них собираются ссылки на PDF и отчёты
+#   feeds   — RSS/Atom новостей и пресс-релизов
+#   pdfs    — прямые ссылки на конкретные PDF (если страница не отдаётся скрапером)
+# Часть сайтов закрыта от ботов или рисуется JS — тогда кладите прямые ссылки в pdfs
+# или файлы вручную в data/raw/<id>/reports/.
+
+[collector]
+user_agent = "Mozilla/5.0 (X11; Linux x86_64) Downstream-Agent/0.1"
+timeout = 30
+max_pdf_mb = 80
+delay_sec = 1.0
+# ссылки на PDF берём, только если в ссылке или тексте есть одно из слов
+pdf_keywords = ["annual", "quarter", "results", "report", "financial", "20-f", "10-k", "interim", "earnings", "ifrs", "年报", "年度", "季度", "中期", "отчет", "отчёт", "мсфо", "результат"]
+
+[[companies]]
+id = "exxonmobil"
+name = "ExxonMobil"
+country = "США"
+langs = ["en"]
+aliases = ["exxon mobil", "exxon"]
+
+[[companies]]
+id = "chevron"
+name = "Chevron"
+country = "США"
+langs = ["en"]
+aliases = []
+
+[[companies]]
+id = "conocophillips"
+name = "ConocoPhillips"
+country = "США"
+langs = ["en"]
+aliases = ["conoco"]
+
+[[companies]]
+id = "hellenic"
+name = "Hellenic Petroleum"
+country = "Греция"
+langs = ["en"]
+aliases = ["helleniq energy", "helleniq"]
+
+[[companies]]
+id = "mol"
+name = "MOL Group"
+country = "Венгрия"
+langs = ["en"]
+aliases = ["mol plc", "mol nyrt", "mol hungarian"]
+
+[[companies]]
+id = "pdvsa"
+name = "PDVSA"
+country = "Венесуэла"
+langs = ["en"]
+aliases = ["petróleos de venezuela", "petroleos de venezuela"]
+
+[[companies]]
+id = "omv"
+name = "OMV"
+country = "Австрия"
+langs = ["en"]
+aliases = []
+
+[[companies]]
+id = "shell"
+name = "Shell"
+country = "Нидерланды/Великобритания"
+langs = ["en"]
+aliases = ["shell plc", "royal dutch shell"]
+exclude = ["shell foundation", "shellfoundation"]
+
+[[companies]]
+id = "bp"
+name = "BP"
+country = "Великобритания"
+langs = ["en"]
+aliases = ["british petroleum", "bp p.l.c.", "bp plc"]
+
+[[companies]]
+id = "totalenergies"
+name = "TotalEnergies"
+country = "Франция"
+langs = ["en"]
+aliases = ["total energies"]
+
+[[companies]]
+id = "sinopec"
+name = "Sinopec"
+country = "Китай"
+langs = ["en", "zh"]
+aliases = ["中国石化", "china petroleum & chemical"]
+
+[[companies]]
+id = "petrochina"
+name = "PetroChina"
+country = "Китай"
+langs = ["en", "zh"]
+aliases = ["中国石油", "中石油"]
+
+[[companies]]
+id = "cnpc"
+name = "CNPC"
+country = "Китай"
+langs = ["en", "zh"]
+aliases = ["china national petroleum corporation", "中国石油天然气集团"]
+
+[[companies]]
+id = "equinor"
+name = "Equinor"
+country = "Норвегия"
+langs = ["en"]
+aliases = ["statoil"]
+
+[[companies]]
+id = "adnoc"
+name = "ADNOC"
+country = "ОАЭ"
+langs = ["en"]
+aliases = ["abu dhabi national oil"]
+
+[[companies]]
+id = "aramco"
+name = "Saudi Aramco"
+country = "Саудовская Аравия"
+langs = ["en"]
+aliases = ["aramco"]
+
+[[companies]]
+id = "qatarenergy"
+name = "QatarEnergy"
+country = "Катар"
+langs = ["en"]
+aliases = ["qatar energy", "qatar petroleum"]
+
+[[companies]]
+id = "petrobras"
+name = "Petrobras"
+country = "Бразилия"
+langs = ["en"]
+aliases = ["petróleo brasileiro", "petroleo brasileiro"]
+
+[[companies]]
+id = "eni"
+name = "Eni"
+country = "Италия"
+langs = ["en"]
+aliases = []
+
+[[companies]]
+id = "saras"
+name = "Saras"
+country = "Италия"
+langs = ["en"]
+aliases = []
+
+[[companies]]
+id = "nioc"
+name = "National Iranian Oil Company"
+country = "Иран"
+langs = ["en"]
+aliases = ["nioc"]
+
+[[companies]]
+id = "sonatrach"
+name = "Sonatrach"
+country = "Алжир"
+langs = ["en"]
+aliases = []
+
+[[companies]]
+id = "nnpc"
+name = "NNPC"
+country = "Нигерия"
+langs = ["en"]
+aliases = ["nigerian national petroleum"]
+
+[[companies]]
+id = "kpc"
+name = "Kuwait Petroleum Corporation"
+country = "Кувейт"
+langs = ["en"]
+aliases = ["kpc", "kuwait petroleum"]
+
+[[companies]]
+id = "pemex"
+name = "Pemex"
+country = "Мексика"
+langs = ["en"]
+aliases = ["petróleos mexicanos", "petroleos mexicanos"]
+
+[[companies]]
+id = "iocl"
+name = "Indian Oil Corporation"
+country = "Индия"
+langs = ["en"]
+aliases = ["iocl", "indian oil"]
+
+[[companies]]
+id = "hpcl"
+name = "Hindustan Petroleum Corporation"
+country = "Индия"
+langs = ["en"]
+aliases = ["hpcl", "hindustan petroleum"]
+
+[[companies]]
+id = "reliance"
+name = "Reliance Industries"
+country = "Индия"
+langs = ["en"]
+aliases = ["ril", "reliance industries limited"]
+
+[[companies]]
+id = "nis"
+name = "NIS Serbia"
+country = "Сербия"
+langs = ["en"]
+aliases = ["naftna industrija srbije", "nis a.d.", "nis j.s.c"]
+
+[[companies]]
+id = "orlen"
+name = "PKN Orlen"
+country = "Польша"
+langs = ["en"]
+aliases = ["orlen"]
+
+[[companies]]
+id = "repsol"
+name = "Repsol"
+country = "Испания"
+langs = ["en"]
+aliases = []
+
+[[companies]]
+id = "lukoil"
+name = "Лукойл"
+country = "Россия"
+langs = ["ru", "en"]
+aliases = ["lukoil", "лукойл"]
+
+[[companies]]
+id = "rosneft"
+name = "Роснефть"
+country = "Россия"
+langs = ["ru", "en"]
+aliases = ["rosneft", "роснефть"]
+
+[[companies]]
+id = "tatneft"
+name = "Татнефть"
+country = "Россия"
+langs = ["ru", "en"]
+aliases = ["tatneft", "татнефть"]
+
+[[companies]]
+id = "zarubezhneft"
+name = "Зарубежнефть"
+country = "Россия"
+langs = ["ru", "en"]
+aliases = ["zarubezhneft", "зарубежнефть"]
+
+[[companies]]
+id = "surgutneftegas"
+name = "Сургутнефтегаз"
+country = "Россия"
+langs = ["ru", "en"]
+aliases = ["surgutneftegas", "surgutneftegaz", "сургутнефтегаз"]
